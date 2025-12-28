@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HwGDRequests</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a1a;
+            color: #fff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+        .section {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .hidden {
+            display: none;
+        }
+        h2 {
+            margin-bottom: 15px;
+            font-size: 1.4em;
+        }
+        h3 {
+            margin-bottom: 15px;
+            color: #aaa;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 2px solid #444;
+            color: #fff;
+            border-radius: 4px;
+            font-size: 1em;
+            margin-bottom: 10px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #666;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button:active {
+            transform: scale(0.98);
+        }
+        button:disabled {
+            background: #666;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #666;
+        }
+        .btn-secondary:hover {
+            background: #555;
+        }
+        .btn-danger {
+            background: #f44336;
+            width: auto;
+            padding: 10px 20px;
+        }
+        .btn-danger:hover {
+            background: #da190b;
+        }
+        .divider {
+            text-align: center;
+            margin: 15px 0;
+            color: #666;
+        }
+        .message {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 4px;
+            display: none;
+        }
+        .message.show {
+            display: block;
+        }
+        .message.success {
+            background: #4CAF50;
+            color: white;
+        }
+        .message.error {
+            background: #f44336;
+            color: white;
+        }
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .panel-header button {
+            width: auto;
+            padding: 8px 16px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .stats strong {
+            color: #4CAF50;
+        }
+        #queueList {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .queue-item {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+        }
+        .level-info {
+            flex: 1;
+        }
+        .level-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        .level-meta {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+        .difficulty-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        .diff-na { background: #666; }
+        .diff-easy { background: #2196F3; }
+        .diff-normal { background: #4CAF50; }
+        .diff-hard { background: #FFC107; color: #000; }
+        .diff-harder { background: #FF5722; }
+        .diff-insane { background: #E91E63; }
+        .diff-demon { background: #8B0000; }
+        .level-actions {
+            display: flex;
+            gap: 10px;
+        }
+        .level-actions button {
+            width: auto;
+            padding: 8px 12px;
+            font-size: 0.9em;
+        }
+        .btn-copy {
+            background: #2196F3;
+        }
+        .btn-copy:hover {
+            background: #0b7dda;
+        }
+        .btn-delete {
+            background: #f44336;
+        }
+        .btn-delete:hover {
+            background: #da190b;
+        }
+        .empty {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-style: italic;
+        }
+        @media (max-width: 600px) {
+            .container {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .queue-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .level-actions {
+                width: 100%;
+            }
+            .level-actions button {
+                flex: 1;
+            }
+            .stats {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .stats button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 HwGDRequests</h1>
+        
+        <div id="loginSection" class="section">
+            <h2>Admin Access</h2>
+            <input type="password" id="adminCode" placeholder="Enter admin code" maxlength="32">
+            <button onclick="adminLogin()">Login</button>
+            <p class="divider">OR</p>
+        </div>
+        
+        <div id="submitSection" class="section">
+            <h2>Submit Level</h2>
+            <input type="text" id="levelId" placeholder="Enter Level ID" maxlength="10">
+            <button id="submitBtn" onclick="submitLevel()">Submit</button>
+            <div id="submitMessage" class="message"></div>
+        </div>
+        
+        <div id="adminPanel" class="section hidden">
+            <div class="panel-header">
+                <h2>Admin Dashboard</h2>
+                <button onclick="logout()" class="btn-secondary">Logout</button>
+            </div>
+            
+            <div class="stats">
+                <span>Total Submitted: <strong id="totalSubmitted">0</strong></span>
+                <button onclick="clearQueue()" class="btn-danger">Clear Queue</button>
+            </div>
+            <div id="queueContainer">
+                <h3>Current Queue</h3>
+                <div id="queueList"></div>
+                <div id="emptyMessage" class="empty">No levels in queue</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let adminToken = null;
+        let autoRefreshInterval = null;
+
+        // Check if admin is already logged in
+        window.addEventListener('DOMContentLoaded', () => {
+            adminToken = sessionStorage.getItem('adminToken');
+            if (adminToken) {
+                showAdminPanel();
+            }
+        });
+
+        // Admin login
+        async function adminLogin() {
+            const code = document.getElementById('adminCode').value.trim();
+            
+            if (!code) {
+                showMessage('submitMessage', 'Please enter admin code', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/admin-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    adminToken = data.token;
+                    sessionStorage.setItem('adminToken', adminToken);
+                    showAdminPanel();
+                } else {
+                    showMessage('submitMessage', data.message || 'Invalid code', 'error');
+                }
+            } catch (error) {
+                showMessage('submitMessage', 'Login failed', 'error');
+            }
+        }
+
+        // Show admin panel
+        function showAdminPanel() {
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('submitSection').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+            
+            loadQueue();
+            autoRefreshInterval = setInterval(loadQueue, 4000);
+        }
+
+        // Logout
+        function logout() {
+            adminToken = null;
+            sessionStorage.removeItem('adminToken');
+            clearInterval(autoRefreshInterval);
+            
+            document.getElementById('loginSection').classList.remove('hidden');
+            document.getElementById('submitSection').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+            document.getElementById('adminCode').value = '';
+        }
+
+        // Submit level (public)
+        async function submitLevel() {
+            const levelId = document.getElementById('levelId').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (!levelId) {
+                showMessage('submitMessage', 'Please enter a level ID', 'error');
+                return;
+            }
+            
+            if (!/^\d+$/.test(levelId)) {
+                showMessage('submitMessage', 'Level ID must be numbers only', 'error');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            
+            try {
+                const response = await fetch('/api/submit-level', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ level_id: levelId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    showMessage('submitMessage', `Okay, ${data.level_name} submitted!`, 'success');
+                    document.getElementById('levelId').value = '';
+                } else {
+                    showMessage('submitMessage', data.message || 'Level not found 🥀', 'error');
+                }
+            } catch (error) {
+                showMessage('submitMessage', 'Submission failed', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit';
+            }
+        }
+
+        // Load queue (admin only)
+        async function loadQueue() {
+            if (!adminToken) return;
+            
+            try {
+                const response = await fetch('/api/get-queue', {
+                    headers: { 'Authorization': adminToken }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    renderQueue(data.queue, data.total);
+                }
+            } catch (error) {
+                console.error('Failed to load queue:', error);
+            }
+        }
+
+        // Render queue
+        function renderQueue(queue, total) {
+            const queueList = document.getElementById('queueList');
+            const emptyMessage = document.getElementById('emptyMessage');
+            document.getElementById('totalSubmitted').textContent = total;
+            
+            if (queue.length === 0) {
+                queueList.innerHTML = '';
+                emptyMessage.style.display = 'block';
+                return;
+            }
+            
+            emptyMessage.style.display = 'none';
+            queueList.innerHTML = queue.map(item => `
+                <div class="queue-item">
+                    <div class="level-info">
+                        <div class="level-name">${escapeHtml(item.level_name)}</div>
+                        <div class="level-meta">
+                            <span class="difficulty-badge diff-${item.difficulty.toLowerCase().replace(' ', '')}">${item.difficulty}</span>
+                            by ${escapeHtml(item.level_author)} • ID: ${item.level_id}
+                        </div>
+                    </div>
+                    <div class="level-actions">
+                        <button class="btn-copy" onclick="copyId('${item.level_id}')">📋 Copy</button>
+                        <button class="btn-delete" onclick="deleteLevel(${item.id})">× Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Copy level ID
+        function copyId(levelId) {
+            navigator.clipboard.writeText(levelId).then(() => {
+                console.log('Copied:', levelId);
+            });
+        }
+
+        // Delete level
+        async function deleteLevel(queueId) {
+            if (!adminToken) return;
+            
+            try {
+                const response = await fetch('/api/delete-level', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': adminToken
+                    },
+                    body: JSON.stringify({ queue_id: queueId })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadQueue();
+                }
+            } catch (error) {
+                console.error('Failed to delete level:', error);
+            }
+        }
+
+        // Clear entire queue
+        async function clearQueue() {
+            if (!adminToken) return;
+            
+            if (!confirm('Clear entire queue and reset rate limits?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/clear-queue', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': adminToken
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    loadQueue();
+                }
+            } catch (error) {
+                console.error('Failed to clear queue:', error);
+            }
+        }
+
+        // Show message helper
+        function showMessage(elementId, message, type) {
+            const el = document.getElementById(elementId);
+            el.textContent = message;
+            el.className = `message show ${type}`;
+            
+            setTimeout(() => {
+                el.classList.remove('show');
+            }, 4000);
+        }
+
+        // Escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Allow Enter key to submit
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('adminCode')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') adminLogin();
+            });
+            
+            document.getElementById('levelId')?.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') submitLevel();
+            });
+        });
+    </script>
+</body>
+</html>
